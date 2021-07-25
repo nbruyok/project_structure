@@ -1,13 +1,29 @@
-const { src, dest, watch } = require("gulp");
-const scss = require("gulp-sass");
+const gulp = require("gulp");
+const concat = require("gulp-concat");
+const uglify = require("gulp-uglify");
+const minify = require("gulp-minify-css");
+const sass = require("gulp-sass");
 
-function styles() {
-  return src("src/scss/main.scss").pipe(scss()).pipe(dest("dist"));
-}
+gulp.task("styles", () => {
+  return gulp
+    .src("src/scss/main.scss")
+    .pipe(sass())
+    .pipe(concat("styles.css"))
+    .pipe(minify())
+    .pipe(gulp.dest("dist"));
+});
 
-function watching() {
-  watch(["src/scss/**/*.scss"], styles);
-}
+gulp.task("scripts", () => {
+  return gulp
+    .src("src/js/*.js")
+    .pipe(concat("script.js"))
+    .pipe(uglify())
+    .pipe(gulp.dest("dist"));
+});
 
-exports.styles = styles;
-exports.watching = watching;
+gulp.task("watch", () => {
+  gulp.watch("src/js/*.js", gulp.series("scripts"));
+  gulp.watch("src/scss/*.scss", gulp.series("styles"));
+});
+
+gulp.task("build", gulp.series("styles", "scripts"));
